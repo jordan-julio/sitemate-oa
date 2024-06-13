@@ -35,12 +35,23 @@ app.post("/api/issues", (req, res) => {
   try {
     const newData = req.body;
     const data = readData();
-    data.push(newData);
+
+    // get nextid and insert data
+    let nextId = data.reduce((acc, curr) => {
+      const currentId = parseInt(curr.id, 10);
+      return currentId > acc ? currentId : acc;
+    }, 0) + 1;
+    const idData = {
+      id: nextId,
+      ...newData
+    }
+    data.push(idData);
     writeData(data);
-    console.log('Create:', newData);
-    res.status(201).send(newData);
+    console.log('Create:', idData);
+    res.status(201).send(idData);
   } catch (err) {
-    res.status(500).send('Error creating new issue', err);
+    console.error('Error creating new issue:', err);
+    res.status(500).send('Error creating new issue');
   }
 });
 
@@ -60,8 +71,9 @@ app.put("/api/issues/:id", (req, res) => {
     const { id } = req.params;
     const updatedData = req.body;
     let data = readData();
-    const index = data.findIndex(item => item.id === id);
+    const index = data.findIndex(item => item.id.toString() === id.toString());
     if (index !== -1) {
+      updatedData.id = data[index].id;
       data[index] = updatedData;
       writeData(data);
       console.log('Update:', updatedData);
@@ -69,7 +81,8 @@ app.put("/api/issues/:id", (req, res) => {
     } else {
       res.status(404).send({ message: 'Data not found' });
     }
-  } catch {
+  } catch (error) {
+    console.error('Error updating issue:', error);
     res.status(500).send('Error updating issue');
   }
 });
@@ -77,13 +90,18 @@ app.put("/api/issues/:id", (req, res) => {
 /**
  * Delete: prints/logs out the object or id to delete
  */
-app.delete("/api/issues", (req, res) => {
+app.delete("/api/issues/:id", (req, res) => {
   const { id } = req.params;
   let data = readData();
-  const newData = data.filter(item => item.id !== id);
-  writeData(newData);
-  console.log('Delete:', id);
-  res.status(204).send();
+  const index = data.findIndex(item => item.id.toString() === id.toString());
+  if (index !== -1) {
+    const deletedData = data.splice(index, 1);
+    writeData(data);
+    console.log('Delete:', deletedData);
+    res.status(204).send();
+  } else {
+    res.status(404).send({ message: 'Data not found' });
+  }
 });
 
 // Handle GET requests to /api route

@@ -1,27 +1,8 @@
 [
   {
-    "title": "New Stuff",
-    "description": "AASDASd",
-    "status": "open"
-  },
-  {
-    "title": "Another new Stuff",
-    "description": "newnew",
-    "status": "closed"
-  },
-  {
-    "title": "test refetch",
-    "description": "a",
-    "status": "open"
-  },
-  {
-    "title": "a",
-    "description": "a",
-    "status": "open"
-  },
-  {
-    "title": "b",
-    "description": "b",
-    "status": "open"
+    "title": "testtt",
+    "description": "testaa",
+    "status": "open",
+    "id": 1
   }
 ]

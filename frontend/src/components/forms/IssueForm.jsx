@@ -1,10 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Modal, Form, Input, Select, Button } from "antd";
 
-const IssueForm = ({ visible, setVisible, refetchData }) => {
+const IssueForm = ({ visible, setVisible, refetchData, issue }) => {
   const [form] = Form.useForm();
-  const [issueInput, setIssueInput] = useState("");
-  const [currentIssue, setCurrentIssue] = useState(null);
 
   // Close the modal
   const onCancel = () => {
@@ -13,27 +11,36 @@ const IssueForm = ({ visible, setVisible, refetchData }) => {
   };
 
   // Function to handle form submission
-  const onCreate = async (values) => {
-    const method = currentIssue ? "PUT" : "POST";
-    const endpoint = currentIssue ? `/api/issues/${currentIssue.id}` : "/api/issues";
+  const onCreateOrUpdate = async (values) => {
+    const method = issue ? "PUT" : "POST";
+    const endpoint = issue ? `/api/issues/${issue.id}` : "/api/issues";
     const payload = { ...values };
 
     try {
-        const response = await fetch(endpoint, {
-            method,
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload),
-        });
-        if (response.ok) {
-            form.resetFields();
-            setCurrentIssue(null);
-            setVisible(false);
-            refetchData();
-        }
+      const response = await fetch(endpoint, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (response.ok) {
+        form.resetFields();
+        setVisible(false);
+        refetchData(); // Assuming this function fetches the latest issues list
+      }
     } catch (error) {
-        console.error("Error:", error);
+      console.error("Error:", error);
     }
   };
+
+  useEffect(() => {
+    if (issue && visible) {
+      form.setFieldsValue({
+        title: issue.title,
+        description: issue.description,
+        status: issue.status,
+      });
+    }
+  }, [issue, form, visible]);
 
   return (
     <Modal
@@ -46,7 +53,7 @@ const IssueForm = ({ visible, setVisible, refetchData }) => {
         form
           .validateFields()
           .then((values) => {
-            onCreate(values);
+            onCreateOrUpdate(values);
           })
           .catch((info) => {
             console.log('Validate Failed:', info);

@@ -11,6 +11,12 @@ function App() {
   const [modalVisible, setModalVisible] = useState(false);
 
   // Fetch issues on mount
+  const fetchIssues = async () => {
+    const response = await fetch("/api/issues");
+    const data = await response.json();
+    setIssues(data);
+  };
+
   useEffect(() => {
     const fetchIssues = async () => {
       const response = await fetch("/api/issues");
@@ -23,7 +29,7 @@ function App() {
   return (
     <Layout className="layout" style={{
       width: '100%',
-      height: '100vh',
+      minHeight: '100vh',
     }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div className="logo" />
@@ -35,7 +41,7 @@ function App() {
         <div style={{ position: 'absolute', top: 0, right: 0, padding: '15px' }}>
           <Button type="primary" onClick={() => setModalVisible(true)}>Create Issue</Button>
         </div>
-        <IssueForm visible={modalVisible} setVisible={setModalVisible} />
+        <IssueForm visible={modalVisible} setVisible={setModalVisible} refetchData={fetchIssues} />
         <div style={{
           display: "grid",
           gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", // Adjusts based on screen size
@@ -45,7 +51,7 @@ function App() {
           padding: '0 15px', // Adds padding on smaller screens
         }}>
           {issues.map((issue) => (
-            <IssueCard key={issue.id} data={issue} />
+            <IssueCard key={issue.id} data={issue} refetch={fetchIssues} />
           ))}
         </div>
       </Content>
